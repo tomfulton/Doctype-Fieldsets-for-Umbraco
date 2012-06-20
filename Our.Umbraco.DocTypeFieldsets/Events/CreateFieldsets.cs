@@ -34,11 +34,11 @@ namespace Our.Umbraco.DocTypeFieldsets.Events
             var allProperties = contentType.PropertyTypes.OrderBy(p => p.SortOrder);
 
             // Loop through configured fieldsets
-            foreach (var fieldset in configuredProperties.Select(x => x.Fieldset).Distinct())
+            foreach (var fieldset in configuredProperties.Select(x => x.Fieldset.ToUpper()).Distinct())
             {
                 _controls = new List<Control>();
 
-                var currentFieldsetConfiguredProperties = configuredProperties.Where(g => g.Fieldset == fieldset);
+                var currentFieldsetConfiguredProperties = configuredProperties.Where(g => g.Fieldset.ToUpper() == fieldset);
 
                 // TODO: optimize w/contains
                 foreach (var property in allProperties.Where(p => currentFieldsetConfiguredProperties.Any(x => x.Alias == p.Alias)))

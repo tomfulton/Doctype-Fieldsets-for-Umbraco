@@ -1,0 +1,1 @@
+﻿This package is a UI Enhancement/Tweak that introduces another layer of grouping for document type properties in addition to Tabs.  It allows you to create "fieldsets" to group your properties within a tab.

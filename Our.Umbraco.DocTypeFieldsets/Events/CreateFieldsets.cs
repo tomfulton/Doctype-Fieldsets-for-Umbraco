@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -30,18 +31,14 @@ namespace Our.Umbraco.DocTypeFieldsets.Events
             if (configuredProperties == null || !configuredProperties.Any() || configuredProperties.Count(x => !string.IsNullOrEmpty(x.Fieldset)) == 0)
                 return;
 
-            // TODO: Handle Masters
-            var allProperties = contentType.PropertyTypes.OrderBy(p => p.SortOrder);
-
             // Loop through configured fieldsets
-            foreach (var fieldset in configuredProperties.Select(x => x.Fieldset.ToUpper()).Distinct())
+            foreach (var fieldset in configuredProperties.Select(x => x.Fieldset).Distinct(StringComparer.CurrentCultureIgnoreCase))
             {
                 _controls = new List<Control>();
 
-                var currentFieldsetConfiguredProperties = configuredProperties.Where(g => g.Fieldset.ToUpper() == fieldset);
+                var currentFieldsetConfiguredProperties = configuredProperties.Where(g => string.Equals(g.Fieldset, fieldset, StringComparison.CurrentCultureIgnoreCase));
 
-                // TODO: optimize w/contains
-                foreach (var property in allProperties.Where(p => currentFieldsetConfiguredProperties.Any(x => x.Alias == p.Alias)))
+				foreach (var property in currentFieldsetConfiguredProperties)
                 {
                     string propertyAlias = property.Alias;
 

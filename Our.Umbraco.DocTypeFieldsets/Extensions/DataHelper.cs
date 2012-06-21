@@ -9,7 +9,7 @@ using umbraco.cms.businesslogic;
 
 namespace Our.Umbraco.DocTypeFieldsets.Extensions
 {
-    public class DataHelper
+    public static class DataHelper
     {
         public static ConfigSection GetConfigSection()
         {
@@ -76,7 +76,7 @@ namespace Our.Umbraco.DocTypeFieldsets.Extensions
         	IEnumerable<GenericPropertyElement> list = Enumerable.Empty<GenericPropertyElement>();
 
 			if (contentTypeElement != null)
-				list = contentTypeElement.GenericProperties.Cast<GenericPropertyElement>();
+				list = contentTypeElement.GenericProperties.Cast<GenericPropertyElement>().AddSortOrder(contentTypeId).OrderByDescending(p => p.SortOrder);
 
         	var contentType = new ContentType(contentTypeId);
 
@@ -93,12 +93,40 @@ namespace Our.Umbraco.DocTypeFieldsets.Extensions
 						section.ContentTypes.Cast<ContentTypeElement>().FirstOrDefault(c => c.Id == masterContentType.Id);
 	
 					if (masterContentTypeElement != null)
-						list = list.Concat(masterContentTypeElement.GenericProperties.Cast<GenericPropertyElement>());
+						list = list.Concat(masterContentTypeElement.GenericProperties.Cast<GenericPropertyElement>().AddSortOrder(masterContentType.Id).OrderByDescending(p => p.SortOrder));
 						
 				}
 				while (masterContentType.MasterContentType > 0);
 			}
+
+			// We added the properties in reverse order - Reverse to get the "correct" order
+			list = list.Reverse();
+
         	return list;
         }
+
+		/// <summary>
+		/// Adds each property's Sort Order as defined in Umbraco to a list of GenericPropertyElements
+		/// Does not take into account the master doctype properties
+		/// </summary>
+		/// <param name="properties">List of GenericPropertyElements to add the sort order to</param>
+		/// <param name="contentTypeId">Content type where the properties exist</param>
+		/// <returns>IEnumerable containing GenericPropertyElements with SortOrder populated</returns>
+		private static IEnumerable<GenericPropertyElement> AddSortOrder(this IEnumerable<GenericPropertyElement> properties, int contentTypeId)
+		{
+			var umbracoProperties = new ContentType(contentTypeId).PropertyTypes.Where(p => p.ContentTypeId == contentTypeId).ToList();
+
+			var _properties = properties.ToList();
+			foreach (var property in _properties)
+			{
+				var umbracoProperty = umbracoProperties.FirstOrDefault(p => p.Alias == property.Alias);
+				if (umbracoProperty != null)
+				{
+					property.SortOrder = umbracoProperty.SortOrder;
+				}
+			}
+
+			return properties;
+		}
     }
 }

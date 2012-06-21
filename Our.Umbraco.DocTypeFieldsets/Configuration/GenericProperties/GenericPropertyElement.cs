@@ -12,13 +12,13 @@ namespace Our.Umbraco.DocTypeFieldsets.Configuration.GenericProperties
 
         private static ConfigurationProperty fieldset;
 
-        #endregion
+		#endregion
 
         static GenericPropertyElement()
         {
             alias = new ConfigurationProperty("alias", typeof(string), null, ConfigurationPropertyOptions.IsRequired);
             fieldset = new ConfigurationProperty("fieldset", typeof(string), null, ConfigurationPropertyOptions.None);
-
+			
             properties = new ConfigurationPropertyCollection { alias, fieldset };
         }
 
@@ -37,19 +37,20 @@ namespace Our.Umbraco.DocTypeFieldsets.Configuration.GenericProperties
             }
         }
 
-        [ConfigurationProperty("fieldset", DefaultValue = "")]
-        public string Fieldset
-        {
-            get
-            {
-                return (string)base[fieldset];
-            }
-            set
-            {
-                base[fieldset] = value;
-            }
-        }
-        
+		[ConfigurationProperty("fieldset", DefaultValue = "")]
+		public string Fieldset
+		{
+			get
+			{
+				return (string)base[fieldset];
+			}
+			set
+			{
+				base[fieldset] = value;
+			}
+		}
+
+    	public int SortOrder { get; set; }
 
         #endregion
     }

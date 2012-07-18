@@ -75,8 +75,6 @@ namespace Our.Umbraco.DocTypeFieldsets.Extensions
 
         	IEnumerable<GenericPropertyElement> list = Enumerable.Empty<GenericPropertyElement>();
 
-			if (contentTypeElement != null)
-				list = contentTypeElement.GenericProperties.Cast<GenericPropertyElement>().AddSortOrder(contentTypeId).OrderByDescending(p => p.SortOrder);
 
         	var contentType = new ContentType(contentTypeId);
 
@@ -99,8 +97,13 @@ namespace Our.Umbraco.DocTypeFieldsets.Extensions
 				while (masterContentType.MasterContentType > 0);
 			}
 
-			// We added the properties in reverse order - Reverse to get the "correct" order
+			// We added the properties in reverse order (walking up the master tree) - Reverse to get the "correct" order
 			list = list.Reverse();
+
+			// Add the properties from the "actual" doctype AFTER the masters have been added
+			if (contentTypeElement != null)
+				list = list.Concat(contentTypeElement.GenericProperties.Cast<GenericPropertyElement>().AddSortOrder(contentTypeId).OrderBy(p => p.SortOrder));
+
 
         	return list;
         }
@@ -115,6 +118,9 @@ namespace Our.Umbraco.DocTypeFieldsets.Extensions
 		private static IEnumerable<GenericPropertyElement> AddSortOrder(this IEnumerable<GenericPropertyElement> properties, int contentTypeId)
 		{
 			var umbracoProperties = new ContentType(contentTypeId).PropertyTypes.Where(p => p.ContentTypeId == contentTypeId).ToList();
+			
+			// By default properties have a 0 sortorder until manually sorted - check for this situation
+			var arePropertiesSorted = umbracoProperties.Any(p => p.SortOrder > 0);
 
 			var _properties = properties.ToList();
 			foreach (var property in _properties)
@@ -122,7 +128,7 @@ namespace Our.Umbraco.DocTypeFieldsets.Extensions
 				var umbracoProperty = umbracoProperties.FirstOrDefault(p => p.Alias == property.Alias);
 				if (umbracoProperty != null)
 				{
-					property.SortOrder = umbracoProperty.SortOrder;
+					property.SortOrder = arePropertiesSorted ? umbracoProperty.SortOrder : umbracoProperties.IndexOf(umbracoProperty);
 				}
 			}
 

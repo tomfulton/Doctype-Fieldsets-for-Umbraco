@@ -152,7 +152,7 @@ namespace Our.Umbraco.DocTypeFieldsets.Events
                     return;
 
                 var requestKey =
-                    HttpContext.Current.Request.Form.AllKeys.Where(k => k.EndsWith(property.Id + "_fieldset")).FirstOrDefault();
+                    HttpContext.Current.Request.Form.AllKeys.Where(k => k.EndsWith("_" + property.Id + "_fieldset")).FirstOrDefault();
                 var newValue = HttpContext.Current.Request.Form[requestKey];
                 var currentValue = DataHelper.GetFieldsetForProperty(aliasTextbox.Text, _contentTypeId);
                 if (currentValue != newValue)
